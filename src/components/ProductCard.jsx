@@ -1,10 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import outOfstockImage from "../asset/outofstock.png";
 import { Link } from "react-router-dom";
 const ProductCard = ({ product, onAddToCart }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedSize, setSelectedSize] = useState("");
+  const [countdown, setCountdown] = useState(24 * 60 * 60); // 24 hours in seconds
 
+  useEffect(() => {
+    if (product.price < 50 && countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [product.price, countdown]);
+
+  // Format seconds to HH:MM:SS
+  const formatCountdown = (secs) => {
+    const h = String(Math.floor(secs / 3600)).padStart(2, "0");
+    const m = String(Math.floor((secs % 3600) / 60)).padStart(2, "0");
+    const s = String(secs % 60).padStart(2, "0");
+    return `${h}:${m}:${s}`;
+  };
   // Mock variants/sizes for demonstration
   const variants =
     product.category === "men's clothing" ||
@@ -67,6 +84,58 @@ const ProductCard = ({ product, onAddToCart }) => {
               }}
             />
           </Link>
+          {product.price < 50 ? (
+            <div
+              style={{
+                position: "absolute",
+                bottom: "0",
+                left: "0",
+                width: "100%",
+                padding: "0 8px",
+                // height: "28px",
+                background: "linear-gradient(135deg, #e91e63, #f06292)",
+                color: "white",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontWeight: "600",
+                fontSize: "13px",
+                zIndex: 2,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              }}
+            >
+              Flash Sale! Special price available for&nbsp;
+              <span style={{ fontFamily: "monospace" }}>
+                {formatCountdown(countdown)}
+              </span>
+            </div>
+          ) : (
+            product.price > 50 &&
+            product.rating.count < 300 &&
+            product.rating.count >= 150 && (
+              <div
+                style={{
+                  position: "absolute",
+                  bottom: "0",
+                  left: "0",
+                  padding: "5px 8px",
+                  width: "100%",
+                  background: "rgba(255, 193, 7, 0.95)",
+                  color: "#333",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "0 8px",
+                  justifyContent: "center",
+                  fontWeight: "600",
+                  fontSize: "13px",
+                  zIndex: 2,
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                }}
+              >
+                Limited Quantity! Don’t miss out.
+              </div>
+            )
+          )}
 
           {/* Out of Stock Stamp */}
           {isOutOfStock && (
