@@ -3,7 +3,6 @@ import { useDispatch } from "react-redux";
 import { addCart } from "../redux/action";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
-
 import toast from "react-hot-toast";
 import ProductCard from "./ProductCard";
 
@@ -45,11 +44,8 @@ const Products = () => {
           <Skeleton height={40} width={560} />
         </div>
         {Array.from({ length: 6 }, (_, index) => (
-          <div key={index} className="col-md-4 col-sm-6 col-xs-8 col-12 mb-4">
-            <div
-              className="card h-100"
-              style={{ borderRadius: "16px", overflow: "hidden" }}
-            >
+          <div key={index} className="col-md-4 col-sm-6 col-12 mb-4">
+            <div className="card h-100 rounded-4 overflow-hidden">
               <Skeleton height={250} />
               <div className="card-body">
                 <Skeleton height={20} className="mb-2" />
@@ -111,10 +107,8 @@ const Products = () => {
 
         {filter.length === 0 && !loading ? (
           <div className="col-12 text-center py-5">
-            <h4 style={{ color: "#666", fontWeight: "500" }}>Out of Stock</h4>
-            <p style={{ color: "#999" }}>
-              No products available in this category
-            </p>
+            <h4 className="text-secondary fw-medium">Out of Stock</h4>
+            <p className="text-muted">No products available in this category</p>
           </div>
         ) : (
           filter.map((product) => (

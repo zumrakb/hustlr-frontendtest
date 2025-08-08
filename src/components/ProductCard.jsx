@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import outOfstockImage from "../asset/outofstock.png";
 import { Link } from "react-router-dom";
+
 const ProductCard = ({ product, onAddToCart }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [selectedSize, setSelectedSize] = useState("");
-  const [countdown, setCountdown] = useState(24 * 60 * 60); // 24 hours in seconds
+  const [countdown, setCountdown] = useState(24 * 60 * 60);
 
   useEffect(() => {
     if (product.price < 50 && countdown > 0) {
@@ -15,21 +16,20 @@ const ProductCard = ({ product, onAddToCart }) => {
     }
   }, [product.price, countdown]);
 
-  // Format seconds to HH:MM:SS
   const formatCountdown = (secs) => {
     const h = String(Math.floor(secs / 3600)).padStart(2, "0");
     const m = String(Math.floor((secs % 3600) / 60)).padStart(2, "0");
     const s = String(secs % 60).padStart(2, "0");
     return `${h}:${m}:${s}`;
   };
-  // Mock variants/sizes for demonstration
+
   const variants =
     product.category === "men's clothing" ||
     product.category === "women's clothing"
       ? ["S", "M", "L", "XL"]
       : [];
 
-  const isOutOfStock = product.rating.count < 150; // Mock out of stock logic
+  const isOutOfStock = product.rating.count < 150;
 
   const handleFavoriteToggle = () => {
     setIsFavorite(!isFavorite);
@@ -41,112 +41,97 @@ const ProductCard = ({ product, onAddToCart }) => {
     }
   };
 
+  const cardHoverStyle = {
+    transition: "all 0.3s ease",
+    borderRadius: "16px",
+  };
+
+  const imageStyle = {
+    height: "250px",
+    objectFit: "contain",
+    transition: "transform 0.3s ease",
+    filter: isOutOfStock
+      ? "grayscale(100%) brightness(0.7) blur(2px) contrast(0.8)"
+      : "none",
+  };
+
+  const handleCardMouseEnter = (e) => {
+    e.currentTarget.style.transform = "translateY(-4px)";
+    e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.1)";
+  };
+
+  const handleCardMouseLeave = (e) => {
+    e.currentTarget.style.transform = "translateY(0)";
+    e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.1)";
+  };
+
+  const handleImageMouseEnter = (e) => {
+    if (!isOutOfStock) e.currentTarget.style.transform = "scale(1.05)";
+  };
+
+  const handleImageMouseLeave = (e) => {
+    e.currentTarget.style.transform = "scale(1)";
+  };
+
   return (
     <div className="col-md-4 col-sm-6 col-xs-8 col-12 mb-4">
       <div
-        className="card h-100 border-0 shadow-sm"
-        style={{
-          borderRadius: "16px",
-          overflow: "hidden",
-          transition: "all 0.3s ease",
-          position: "relative",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.transform = "translateY(-4px)";
-          e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.1)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.transform = "translateY(0)";
-          e.currentTarget.style.boxShadow = "0 2px 10px rgba(0,0,0,0.1)";
-        }}
+        className="card h-100 border-0 shadow-sm position-relative overflow-hidden"
+        style={cardHoverStyle}
+        onMouseEnter={handleCardMouseEnter}
+        onMouseLeave={handleCardMouseLeave}
       >
-        {/* Image Container */}
-        <div style={{ position: "relative", background: "#f8f9fa" }}>
+        <div className="position-relative bg-light">
           <Link to={`/product/${product.id}`}>
             <img
-              className="card-img-top p-3"
+              className="card-img-top p-3 w-100"
               src={product.image}
               alt={product.title}
-              style={{
-                height: "250px",
-                objectFit: "contain",
-                transition: "transform 0.3s ease",
-                filter: isOutOfStock
-                  ? "grayscale(100%) brightness(0.7) blur(2px) contrast(0.8)"
-                  : "none",
-              }}
-              onMouseEnter={(e) => {
-                if (!isOutOfStock)
-                  e.currentTarget.style.transform = "scale(1.05)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-              }}
+              style={imageStyle}
+              onMouseEnter={handleImageMouseEnter}
+              onMouseLeave={handleImageMouseLeave}
             />
           </Link>
+
           {product.price < 50 ? (
-            <div
-              style={{
-                position: "absolute",
-                bottom: "0",
-                left: "0",
-                width: "100%",
-                padding: "0 8px",
-                // height: "28px",
-                background: "linear-gradient(135deg, #e91e63, #f06292)",
-                color: "white",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontWeight: "600",
-                fontSize: "13px",
-                zIndex: 2,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-              }}
-            >
-              Flash Sale! Special price available for&nbsp;
-              <span style={{ fontFamily: "monospace" }}>
-                {formatCountdown(countdown)}
-              </span>
+            <div className="position-absolute bottom-0 start-0 w-100 px-2 bg-gradient text-white d-flex align-items-center justify-content-center fw-semibold small">
+              <div
+                className="w-100 text-center py-1"
+                style={{
+                  background: "linear-gradient(135deg, #e91e63, #f06292)",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                }}
+              >
+                Flash Sale! Special price available for&nbsp;
+                <span className="font-monospace">
+                  {formatCountdown(countdown)}
+                </span>
+              </div>
             </div>
           ) : (
             product.price > 50 &&
             product.rating.count < 300 &&
             product.rating.count >= 150 && (
-              <div
-                style={{
-                  position: "absolute",
-                  bottom: "0",
-                  left: "0",
-                  padding: "5px 8px",
-                  width: "100%",
-                  background: "rgba(255, 193, 7, 0.95)",
-                  color: "#333",
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "0 8px",
-                  justifyContent: "center",
-                  fontWeight: "600",
-                  fontSize: "13px",
-                  zIndex: 2,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                }}
-              >
-                Limited Quantity! Don’t miss out.
+              <div className="position-absolute bottom-0 start-0 w-100 px-2 d-flex align-items-center justify-content-center fw-semibold small text-dark">
+                <div
+                  className="w-100 text-center py-1"
+                  style={{
+                    background: "rgba(255, 193, 7, 0.95)",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+                  }}
+                >
+                  Limited Quantity! Don't miss out.
+                </div>
               </div>
             )
           )}
 
-          {/* Out of Stock Stamp */}
           {isOutOfStock && (
             <img
               src={outOfstockImage}
               alt="Out of Stock"
+              className="position-absolute top-50 start-50 translate-middle"
               style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
                 width: "150px",
                 opacity: 0.8,
                 pointerEvents: "none",
@@ -154,47 +139,31 @@ const ProductCard = ({ product, onAddToCart }) => {
             />
           )}
 
-          {/* Favorite Button */}
           <button
             onClick={handleFavoriteToggle}
-            className="btn btn-light"
+            className="btn btn-light position-absolute rounded-circle border-0 shadow-sm d-flex align-items-center justify-content-center"
             style={{
-              position: "absolute",
               top: "10px",
               right: "10px",
-              borderRadius: "50%",
               width: "40px",
               height: "40px",
-              border: "none",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
             }}
           >
             <span
+              className="fs-5"
               style={{
                 color: isFavorite ? "#e91e63" : "#666",
-                fontSize: "18px",
               }}
             >
               {isFavorite ? "♥" : "♡"}
             </span>
           </button>
 
-          {/* Discount Badge */}
           {product.price < 50 && (
             <div
+              className="position-absolute top-0 start-0 m-2 px-2 py-1 rounded-pill text-white small fw-semibold"
               style={{
-                position: "absolute",
-                top: "10px",
-                left: "10px",
                 background: "linear-gradient(135deg, #e91e63, #f06292)",
-                color: "white",
-                padding: "4px 8px",
-                borderRadius: "12px",
-                fontSize: "12px",
-                fontWeight: "600",
               }}
             >
               32% OFF
@@ -202,54 +171,30 @@ const ProductCard = ({ product, onAddToCart }) => {
           )}
         </div>
 
-        <div className="card-body" style={{ padding: "20px" }}>
-          {/* Category & Rating */}
+        <div className="card-body p-3">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <span
-              style={{
-                fontSize: "12px",
-                color: "#666",
-                textTransform: "capitalize",
-                fontWeight: "500",
-              }}
-            >
+            <span className="small text-muted text-capitalize fw-medium">
               {product.category.replace("'s", "")}
             </span>
             <div className="d-flex align-items-center mb-3">
-              <span
-                style={{
-                  color: "#20c997",
-                  fontSize: "14px",
-                  fontWeight: "500",
-                }}
-              >
+              <span className="text-success small fw-medium">
                 ★ {product.rating.rate}
               </span>
-              <span
-                style={{ color: "#666", fontSize: "14px", marginLeft: "8px" }}
-              >
+              <span className="text-muted small ms-2">
                 ({product.rating.count.toLocaleString()})
               </span>
             </div>
           </div>
 
-          {/* Product Title */}
           <Link
             to={`/product/${product.id}`}
-            style={{
-              textDecoration: "none",
-              color: "inherit",
-              cursor: "pointer",
-              outline: "none",
-            }}
+            className="text-decoration-none text-dark"
           >
             <h5
-              className="card-title"
+              className="card-title fw-semibold mb-2"
               style={{
                 fontSize: "16px",
-                fontWeight: "600",
                 lineHeight: "1.4",
-                marginBottom: "8px",
                 height: "44px",
                 overflow: "hidden",
                 display: "-webkit-box",
@@ -260,13 +205,10 @@ const ProductCard = ({ product, onAddToCart }) => {
               {product.title}
             </h5>
           </Link>
-          {/* Description */}
+
           <p
-            className="card-text"
+            className="card-text text-muted small mb-2"
             style={{
-              fontSize: "14px",
-              color: "#666",
-              marginBottom: "8px",
               height: "40px",
               overflow: "hidden",
               display: "-webkit-box",
@@ -277,20 +219,15 @@ const ProductCard = ({ product, onAddToCart }) => {
             {product.description}
           </p>
 
-          {/* Variants/Sizes */}
           {variants.length > 0 && (
             <div className="mb-3">
-              <p
-                style={{ fontSize: "14px", color: "#666", marginBottom: "8px" }}
-              >
-                Size:
-              </p>
+              <p className="small text-muted mb-2">Size:</p>
               <div className="d-flex gap-2 flex-wrap">
                 {variants.map((size) => (
                   <button
                     key={size}
                     onClick={() => setSelectedSize(size)}
-                    className={`btn btn-sm ${
+                    className={`btn btn-sm rounded-2 ${
                       selectedSize === size
                         ? "btn-dark"
                         : "btn-outline-secondary"
@@ -298,7 +235,6 @@ const ProductCard = ({ product, onAddToCart }) => {
                     style={{
                       minWidth: "36px",
                       height: "32px",
-                      borderRadius: "8px",
                       fontSize: "12px",
                     }}
                   >
@@ -309,48 +245,32 @@ const ProductCard = ({ product, onAddToCart }) => {
             </div>
           )}
 
-          {/* Price */}
           <div className="d-flex align-items-center mb-3">
-            <span
-              style={{
-                fontSize: "20px",
-                fontWeight: "700",
-                color: "#333",
-              }}
-            >
-              ${product.price}
-            </span>
+            <span className="h5 fw-bold text-dark mb-0">${product.price}</span>
             {product.price < 50 && (
-              <span
-                style={{
-                  fontSize: "14px",
-                  color: "#999",
-                  textDecoration: "line-through",
-                  marginLeft: "8px",
-                }}
-              >
+              <span className="small text-muted text-decoration-line-through ms-2">
                 ${(product.price * 1.47).toFixed(2)}
               </span>
             )}
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="card-body pt-0" style={{ padding: "0 20px 20px" }}>
+        <div className="card-body pt-0 px-3 pb-3">
           <div className="d-grid gap-2 d-md-flex">
             <Link
               to={"/product/" + product.id}
-              className="btn btn-outline-dark w-100 w-md-auto"
+              className="btn btn-outline-dark flex-fill rounded-3 fw-medium d-flex align-items-center justify-content-center text-decoration-none"
               style={{
-                borderRadius: "12px",
-                fontWeight: "500",
                 height: "44px",
                 fontSize: "14px",
-                textDecoration: "none",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
+                pointerEvents: isOutOfStock ? "none" : "auto",
+                background: isOutOfStock ? "#e9ecef" : "",
+                color: isOutOfStock ? "#6c757d" : "",
+                cursor: isOutOfStock ? "not-allowed" : "pointer",
+                opacity: isOutOfStock ? 0.7 : 1,
               }}
+              aria-disabled={isOutOfStock}
+              tabIndex={isOutOfStock ? -1 : 0}
             >
               Buy Now
             </Link>
@@ -358,15 +278,15 @@ const ProductCard = ({ product, onAddToCart }) => {
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock}
-              className="btn w-100 w-md-auto"
+              className={`btn flex-fill rounded-3 fw-medium ${
+                isOutOfStock ? "btn-secondary" : ""
+              }`}
               style={{
                 background: isOutOfStock
                   ? "#e9ecef"
                   : "linear-gradient(135deg, #e91e63, #f06292)",
                 color: isOutOfStock ? "#6c757d" : "white",
                 border: "none",
-                borderRadius: "12px",
-                fontWeight: "500",
                 height: "44px",
                 fontSize: "14px",
                 cursor: isOutOfStock ? "not-allowed" : "pointer",
@@ -376,7 +296,7 @@ const ProductCard = ({ product, onAddToCart }) => {
                 "Out of Stock"
               ) : (
                 <>
-                  <i className="fa fa-cart-shopping mr-1"></i> Add to Cart
+                  <i className="fa fa-cart-shopping me-1"></i> Add to Cart
                 </>
               )}
             </button>
